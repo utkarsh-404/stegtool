@@ -1,24 +1,62 @@
 #!/bin/bash
 
-# Ensure script is run with sudo (needed for apt installs)
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Please run with sudo: sudo ./install.sh"
-  exit 1
+echo "=============================="
+echo " Steganography Tool Installer "
+echo "=============================="
+
+# Check for Python3
+if ! command -v python3 &> /dev/null; then
+    echo "[!] Python3 is not installed. Please install Python 3.7+ first."
+    exit 1
 fi
 
-echo "🔧 Updating system packages..."
-apt-get update -y
+# Create virtual environment
+echo "[*] Creating virtual environment..."
+python3 -m venv venv || { echo "[!] Failed to create virtual environment"; exit 1; }
 
-echo "📦 Installing required CLI tools..."
-apt-get install -y steghide zsteg openstego libimage-exiftool-perl ffmpeg binwalk
+# Activate the virtual environment
+source venv/bin/activate || { echo "[!] Failed to activate virtual environment"; exit 1; }
 
-echo "🐍 Installing Python dependencies from requirements.txt..."
-# Make sure pip3 is available
-if ! command -v pip3 &> /dev/null; then
-  echo "pip3 could not be found. Installing python3-pip..."
-  apt-get install -y python3-pip
+# Upgrade pip
+echo "[*] Upgrading pip..."
+pip install --upgrade pip
+
+# Install Python dependencies
+echo "[*] Installing Python dependencies from requirements.txt..."
+pip install -r requirements.txt || { echo "[!] Failed to install Python packages"; exit 1; }
+
+# Install required system tools
+echo "[*] Installing system tools..."
+
+# Steghide
+if ! command -v steghide &> /dev/null; then
+    echo "[*] Installing steghide..."
+    sudo apt-get update
+    sudo apt-get install -y steghide
+else
+    echo "[+] Steghide already installed."
 fi
 
-pip3 install -r requirements.txt
+# Ruby (for zsteg)
+if ! command -v ruby &> /dev/null; then
+    echo "[*] Installing Ruby..."
+    sudo apt-get install -y ruby-full
+else
+    echo "[+] Ruby already installed."
+fi
 
-echo "✅ Installation complete! Run 'python3 main.py' to start the tool."
+# zsteg via gem
+if ! command -v zsteg &> /dev/null; then
+    echo "[*] Installing zsteg (Ruby gem)..."
+    sudo gem install zsteg
+else
+    echo "[+] zsteg already installed."
+fi
+
+echo "======================================"
+echo "[+] Setup complete! You're good to go."
+echo "To start using the tool, activate the virtual environment:"
+echo "    source venv/bin/activate"
+echo "Then run:"
+echo "    python main.py"
+echo "======================================"
