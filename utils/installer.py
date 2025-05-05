@@ -17,49 +17,55 @@ def ensure_dependencies():
     """Ensure required tools and libraries are installed."""
     print("[*] Checking system dependencies...")
 
-    # Install Ruby and zsteg
+    # 1. Install Ruby if missing (needed for zsteg)
     if not is_tool_installed("ruby"):
-        print("[*] Installing Ruby...")
+        print("[!] ruby not found. Installing ruby-full...")
         install_system_tool("ruby-full")
 
+    # 2. Install zsteg via gem if missing
     if not is_tool_installed("zsteg"):
-        print("[*] Installing zsteg via gem...")
+        print("[!] zsteg not found. Installing via gem...")
         install_ruby_gem("zsteg")
 
-    # Install other system tools if not already installed
-    system_tools = ['steghide', 'opensteg', 'ffmpeg', 'libimage-exiftool-perl', 'binwalk']
+    # 3. Install other system tools if not already installed
+    #    We handle opensteg, steghide, ffmpeg here
+    system_tools = ['steghide', 'openstego', 'ffmpeg']
     for tool in system_tools:
         if not is_tool_installed(tool):
-            print(f"[!] {tool} not found. Installing...")
+            print(f"[!] {tool} not found. Installing {tool}...")
+            # openstego may require Java + manual install; we try apt first
             install_system_tool(tool)
-
-    # Check and install Python dependencies
+    
+    # 4. Install Python dependencies
     install_requirements()
-
-    # Final check to ensure all tools are installed
+    
+    # 5. Final check: report any missing tools
     check_all_tools()
 
 def is_tool_installed(tool):
-    """Check if a command line tool is installed."""
+    """Check if a command line tool is installed by probing --version."""
     try:
-        subprocess.check_call([tool, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.check_call([tool, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
 def install_system_tool(tool):
-    """Install the system tool using the appropriate package manager."""
+    """Install a system tool using apt (Linux) or brew (macOS)."""
     try:
-        if sys.platform in ['linux', 'linux2']:
+        if sys.platform.startswith('linux'):
+            subprocess.check_call(['sudo', 'apt-get', 'update'], stdout=subprocess.DEVNULL)
             subprocess.check_call(['sudo', 'apt-get', 'install', '-y', tool])
-        elif sys.platform == 'darwin':  # macOS support
+        elif sys.platform == 'darwin':
             subprocess.check_call(['brew', 'install', tool])
         else:
-            print(f"[!] Unsupported OS for {tool}. Please install manually.")
+            print(f"[!] Unsupported OS ({sys.platform}) for {tool}. Please install manually.")
             sys.exit(1)
+        print(f"[+] {tool} installed.")
     except subprocess.CalledProcessError:
         print(f"[!] Failed to install {tool}.")
-        sys.exit(1)
+        # Do not exit here; allow final check to report missing tools
+        
 
 def install_ruby_gem(gem_name):
     """Install a Ruby gem."""
@@ -68,7 +74,7 @@ def install_ruby_gem(gem_name):
         print(f"[+] {gem_name} gem installed.")
     except subprocess.CalledProcessError:
         print(f"[!] Failed to install {gem_name} gem.")
-        sys.exit(1)
+        # Do not exit here; allow final check to report missing tools
 
 if __name__ == "__main__":
     ensure_dependencies()
