@@ -28,18 +28,21 @@ def ensure_dependencies():
         install_ruby_gem("zsteg")
 
     # 3. Install other system tools if not already installed
-    #    We handle opensteg, steghide, ffmpeg here
-    system_tools = ['steghide', 'openstego', 'ffmpeg']
+    system_tools = ['steghide', 'ffmpeg']
     for tool in system_tools:
         if not is_tool_installed(tool):
             print(f"[!] {tool} not found. Installing {tool}...")
-            # openstego may require Java + manual install; we try apt first
             install_system_tool(tool)
-    
-    # 4. Install Python dependencies
+
+    # 4. Special handling for openstego installation
+    if not is_tool_installed("openstego"):
+        print("[!] openstego not found. Attempting to install OpenStego manually...")
+        install_openstego()
+
+    # 5. Install Python dependencies
     install_requirements()
-    
-    # 5. Final check: report any missing tools
+
+    # 6. Final check: report any missing tools
     check_all_tools()
 
 def is_tool_installed(tool):
@@ -65,7 +68,6 @@ def install_system_tool(tool):
     except subprocess.CalledProcessError:
         print(f"[!] Failed to install {tool}.")
         # Do not exit here; allow final check to report missing tools
-        
 
 def install_ruby_gem(gem_name):
     """Install a Ruby gem."""
@@ -75,6 +77,27 @@ def install_ruby_gem(gem_name):
     except subprocess.CalledProcessError:
         print(f"[!] Failed to install {gem_name} gem.")
         # Do not exit here; allow final check to report missing tools
+
+def install_openstego():
+    """Manually install OpenStego."""
+    try:
+        # OpenStego requires Java and download from their website
+        print("[*] Downloading OpenStego...")
+        openstego_url = "https://www.openstego.com/download/OpenStego-0.8.1.zip"
+        subprocess.check_call(['wget', openstego_url, '-O', 'OpenStego.zip'])
+
+        # Extract ZIP file
+        print("[*] Extracting OpenStego...")
+        subprocess.check_call(['unzip', 'OpenStego.zip'])
+
+        # Install Java if necessary
+        if not is_tool_installed('java'):
+            print("[!] Java not found. Installing...")
+            subprocess.check_call(['sudo', 'apt-get', 'install', '-y', 'default-jre'])
+
+        print("[+] OpenStego installed. Please run 'java -jar OpenStego.jar' to use.")
+    except subprocess.CalledProcessError:
+        print("[!] Failed to install OpenStego. Please install manually from the website.")
 
 if __name__ == "__main__":
     ensure_dependencies()
