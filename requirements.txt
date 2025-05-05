@@ -1,0 +1,8 @@
+# Image processing
+Pillow
+
+# Numerical operations
+numpy
+
+# Computer vision (for video & advanced image handling)
+opencv-python
