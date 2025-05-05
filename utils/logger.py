@@ -34,3 +34,22 @@ class Logger:
     def error(cls, message):
         cls.log(message, "ERROR")
         sys.exit(1)
+
+    @staticmethod
+    def banner():
+        """Display a banner or logo at the start of the application."""
+        print("""
+        ***********************************************
+        *           Steganography Tool              *
+        ***********************************************
+        """)
+
+    @staticmethod
+    def print_info(message):
+        """Print informational messages."""
+        Logger.info(message)
+
+    @staticmethod
+    def print_error(message):
+        """Print error messages."""
+        Logger.error(message)
