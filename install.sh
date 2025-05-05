@@ -28,13 +28,39 @@ pip install -r requirements.txt || { echo "[!] Failed to install Python packages
 # Install required system tools
 echo "[*] Installing system tools..."
 
+# Update package lists once
+sudo apt-get update -y
+
 # Steghide
 if ! command -v steghide &> /dev/null; then
     echo "[*] Installing steghide..."
-    sudo apt-get update
     sudo apt-get install -y steghide
 else
-    echo "[+] Steghide already installed."
+    echo "[+] steghide already installed."
+fi
+
+# exiftool
+if ! command -v exiftool &> /dev/null; then
+    echo "[*] Installing exiftool..."
+    sudo apt-get install -y libimage-exiftool-perl
+else
+    echo "[+] exiftool already installed."
+fi
+
+# ffmpeg
+if ! command -v ffmpeg &> /dev/null; then
+    echo "[*] Installing ffmpeg..."
+    sudo apt-get install -y ffmpeg
+else
+    echo "[+] ffmpeg already installed."
+fi
+
+# binwalk
+if ! command -v binwalk &> /dev/null; then
+    echo "[*] Installing binwalk..."
+    sudo apt-get install -y binwalk
+else
+    echo "[+] binwalk already installed."
 fi
 
 # Ruby (for zsteg)
@@ -49,6 +75,11 @@ fi
 if ! command -v zsteg &> /dev/null; then
     echo "[*] Installing zsteg (Ruby gem)..."
     sudo gem install zsteg
+    if command -v zsteg &> /dev/null; then
+        echo "[+] zsteg installed successfully."
+    else
+        echo "[!] Failed to install zsteg via gem."
+    fi
 else
     echo "[+] zsteg already installed."
 fi
