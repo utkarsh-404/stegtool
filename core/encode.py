@@ -45,7 +45,7 @@ def encode_message(filepath, message, password, tool=None):
         print(f"[!] Tool '{tool}' not supported yet.")
 
 
-def main():
+def run_encode():
     parser = argparse.ArgumentParser(description="Encode a message into a media file.")
     parser.add_argument('--file', required=True, help='Path to input image/audio/video file')
     parser.add_argument('--message', required=True, help='Message to hide')
