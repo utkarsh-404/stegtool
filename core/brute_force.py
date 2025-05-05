@@ -41,7 +41,7 @@ def brute_force_steghide(file_path, wordlist, output_file="bruteforce_output.txt
     return None
 
 
-def main():
+def run_brute_force():
     parser = argparse.ArgumentParser(description="Brute-force steghide password using a wordlist.")
     parser.add_argument('--file', required=True, help='Stego file to attack')
     parser.add_argument('--wordlist', required=True, help='Path to password wordlist')
