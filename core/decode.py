@@ -51,7 +51,7 @@ def decode_message(filepath, password=None, tool=None):
         print("[!] No message found or decoding failed.")
 
 
-def main():
+def run_decode():
     parser = argparse.ArgumentParser(description="Decode a hidden message from a media file.")
     parser.add_argument('--file', required=True, help='Path to the stego file')
     parser.add_argument('--password', help='Password if required (e.g., for steghide)')
