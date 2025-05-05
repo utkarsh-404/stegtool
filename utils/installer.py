@@ -1,38 +1,56 @@
+import os
 import subprocess
-import platform
-from utils.logger import Logger
+import sys
+from utils.check_tools import check_all_tools
 
-def install_package(package_name):
+def install_requirements():
+    """Install Python dependencies via pip."""
     try:
-        Logger.info(f"Installing {package_name}...")
-        subprocess.run(["sudo", "apt-get", "install", "-y", package_name], check=True)
-        Logger.success(f"{package_name} installed successfully.")
+        print("[*] Installing Python dependencies...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        print("[+] Python dependencies installed.")
     except subprocess.CalledProcessError:
-        Logger.error(f"Failed to install {package_name}.")
+        print("[!] Failed to install Python dependencies.")
+        sys.exit(1)
 
-def install_python_package(package_name):
+def ensure_dependencies():
+    """Ensure required tools and libraries are installed."""
+    print("[*] Checking system dependencies...")
+    
+    # Install system dependencies if not already installed
+    system_tools = ['steghide', 'zsteg', 'opensteg', 'ffmpeg']
+    for tool in system_tools:
+        if not is_tool_installed(tool):
+            print(f"[!] {tool} not found. Installing...")
+            install_system_tool(tool)
+    
+    # Check and install Python dependencies
+    install_requirements()
+    
+    # Check if all necessary tools are available
+    check_all_tools()
+
+def is_tool_installed(tool):
+    """Check if a command line tool is installed."""
     try:
-        Logger.info(f"Installing Python package: {package_name}...")
-        subprocess.run(["pip3", "install", package_name], check=True)
-        Logger.success(f"{package_name} installed successfully.")
+        subprocess.check_call([tool, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
     except subprocess.CalledProcessError:
-        Logger.error(f"Failed to install Python package: {package_name}.")
+        return False
 
-def run_full_install():
-    if platform.system() != "Linux":
-        Logger.warning("This installer currently supports Linux only.")
-        return
+def install_system_tool(tool):
+    """Install the system tool using the appropriate package manager."""
+    try:
+        if sys.platform == 'linux' or sys.platform == 'linux2':
+            subprocess.check_call(['sudo', 'apt-get', 'install', '-y', tool])
+        elif sys.platform == 'darwin':
+            subprocess.check_call(['brew', 'install', tool])
+        else:
+            print(f"[!] Unsupported OS for {tool}. Please install manually.")
+            sys.exit(1)
+    except subprocess.CalledProcessError:
+        print(f"[!] Failed to install {tool}.")
+        sys.exit(1)
 
-    cli_tools = ["steghide", "zsteg", "openstego", "exiftool", "ffmpeg", "binwalk"]
-    python_packages = ["pillow", "opencv-python", "numpy", "pycryptodome"]
-
-    Logger.info("Starting full installation...\n")
-
-    for tool in cli_tools:
-        install_package(tool)
-
-    for pkg in python_packages:
-        install_python_package(pkg)
-
-    Logger.success("\nInstallation complete. You're ready to go!")
-
+if __name__ == "__main__":
+    ensure_dependencies()
