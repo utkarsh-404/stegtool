@@ -90,7 +90,7 @@ def detect_steganography(file_path):
     print("\n[✓] Detection complete.")
 
 
-def main():
+def run_detect():
     parser = argparse.ArgumentParser(description="Detect signs of steganography in a media file.")
     parser.add_argument('--file', required=True, help='Path to the media file to analyze')
     args = parser.parse_args()
