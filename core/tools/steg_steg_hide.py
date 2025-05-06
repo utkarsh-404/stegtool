@@ -14,7 +14,7 @@ if not is_tool_installed('steghide'):
     sys.exit(1)
 
 
-def encode_message(filepath, message, password, tool=None):
+def encode(filepath, message, password, tool=None):
     file_type = get_file_type(filepath)
 
     if tool is None:
