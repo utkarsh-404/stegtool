@@ -14,25 +14,36 @@ if not is_tool_installed('steghide'):
     sys.exit(1)
 
 
-def encode_steg_hide(image_path, message_file, password, output_path):
-    """
-    Encode a message into an image using Steghide.
-    :param image_path: Path to the cover image.
-    :param message_file: Path to the file containing the message to hide.
-    :param password: Password for the steganography.
-    :param output_path: Path to save the output file.
-    :return: None
-    """
-    try:
-        print(f"[+] Encoding message from {message_file} into {image_path}...")
-        command = [
-            'steghide', 'embed', '-cf', image_path, '-ef', message_file,
-            '-p', password, '-sf', output_path
-        ]
-        subprocess.run(command, check=True)
-        print(f"[+] Steganographic image saved as {output_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"[!] Error during encoding: {e}")
+def encode_message(filepath, message, password, tool=None):
+    file_type = get_file_type(filepath)
+
+    if tool is None:
+        if file_type == 'image':
+            tool = 'custom_lsb'
+        else:
+            print("[!] Please specify a tool for non-image files.")
+            return
+
+    print(f"[+] Using tool: {tool}")
+
+    if tool == 'custom_lsb':
+        custom_lsb.encode(filepath, message)
+    elif tool == 'steghide':
+        # Create a temporary message file
+        message_file = "/tmp/message.txt"
+        with open(message_file, "w") as msg_file:
+            msg_file.write(message)
+        
+        # Call the encode function from steg_steg_hide
+        output_file = filepath  # or you can specify a different output path
+        steg_steg_hide.encode_steg_hide(filepath, message_file, password, output_file)
+    elif tool == 'zsteg':
+        steg_zsteg.encode(filepath, message)
+    elif tool == 'opensteg':
+        steg_opensteg.encode(filepath, message, password)
+    else:
+        print(f"[!] Tool '{tool}' not supported yet.")
+
 
 
 def decode_steg_hide(stego_image_path, password, output_message_path):
