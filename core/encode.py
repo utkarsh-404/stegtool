@@ -1,12 +1,13 @@
-import argparse
 import os
 import sys
 from pathlib import Path
+import argparse
 
 # Importing custom encoding tools
 sys.path.append(str(Path(__file__).resolve().parents[1]))  # add root to path
 
 from core.tools import custom_lsb, steg_steg_hide, steg_zsteg, steg_opensteg
+
 
 def get_file_type(filepath):
     ext = os.path.splitext(filepath)[1].lower()
@@ -18,6 +19,7 @@ def get_file_type(filepath):
         return 'video'
     else:
         return 'unknown'
+
 
 def encode_message(filepath, message, password, tool=None):
     file_type = get_file_type(filepath)
@@ -42,13 +44,15 @@ def encode_message(filepath, message, password, tool=None):
     else:
         print(f"[!] Tool '{tool}' not supported yet.")
 
+
 # CLI Version of the encoder
 def run_encode_cli():
     parser = argparse.ArgumentParser(description="Encode a message into a media file.")
     parser.add_argument('--file', required=True, help='Path to input image/audio/video file')
     parser.add_argument('--message', required=True, help='Message to hide')
     parser.add_argument('--password', help='Password (optional, used for tools like steghide)')
-    parser.add_argument('--tool', choices=['custom_lsb', 'steghide', 'zsteg', 'opensteg'], help='Tool to use (default: custom_lsb for images)')
+    parser.add_argument('--tool', choices=['custom_lsb', 'steghide', 'zsteg', 'opensteg'], default='custom_lsb',
+                        help='Tool to use (default: custom_lsb for images)')
 
     args = parser.parse_args()
 
@@ -57,6 +61,7 @@ def run_encode_cli():
         sys.exit(1)
 
     encode_message(args.file, args.message, args.password, args.tool)
+
 
 # Interactive Version of the encoder (for the menu)
 def run_encode_menu():
@@ -71,6 +76,7 @@ def run_encode_menu():
 
     encode_message(file, message, password, tool)
 
+
 # Main function to select CLI or Menu-based execution
 def run_encode():
     import sys
@@ -80,6 +86,7 @@ def run_encode():
     else:
         # Otherwise, run the menu version
         run_encode_menu()
+
 
 if __name__ == "__main__":
     run_encode()
