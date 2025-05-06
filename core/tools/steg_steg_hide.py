@@ -13,6 +13,19 @@ if not is_tool_installed('steghide'):
     print("[!] Steghide is not installed. Please install it to use this feature.")
     sys.exit(1)
 
+def get_file_type(filepath):
+    """
+    Determines the file type based on file extension.
+    :param filepath: Path to the file.
+    :return: String representing file type ('image' or 'other').
+    """
+    image_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif']
+    _, extension = os.path.splitext(filepath)
+    
+    if extension.lower() in image_extensions:
+        return 'image'
+    else:
+        return 'other'
 
 def encode(filepath, message, password, tool=None):
     file_type = get_file_type(filepath)
