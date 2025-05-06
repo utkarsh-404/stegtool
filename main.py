@@ -10,7 +10,6 @@ from core.brute_force import run_brute_force
 from core.detect import run_detect
 
 # Utils
-from utils.installer import ensure_dependencies
 from utils.logger import banner, print_info, print_error
 
 def main_menu():
@@ -42,7 +41,6 @@ def main_menu():
 
 if __name__ == "__main__":
     try:
-        ensure_dependencies()
         main_menu()
     except KeyboardInterrupt:
         print_error("\nInterrupted by user. Exiting.")
