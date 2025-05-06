@@ -8,7 +8,6 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))  # add root to path
 
 from core.tools import custom_lsb, steg_steg_hide, steg_zsteg, steg_opensteg
 
-
 def get_file_type(filepath):
     ext = os.path.splitext(filepath)[1].lower()
     if ext in ['.png', '.jpg', '.jpeg', '.bmp']:
@@ -19,7 +18,6 @@ def get_file_type(filepath):
         return 'video'
     else:
         return 'unknown'
-
 
 def encode_message(filepath, message, password, tool=None):
     file_type = get_file_type(filepath)
@@ -44,8 +42,8 @@ def encode_message(filepath, message, password, tool=None):
     else:
         print(f"[!] Tool '{tool}' not supported yet.")
 
-
-def run_encode():
+# CLI Version of the encoder
+def run_encode_cli():
     parser = argparse.ArgumentParser(description="Encode a message into a media file.")
     parser.add_argument('--file', required=True, help='Path to input image/audio/video file')
     parser.add_argument('--message', required=True, help='Message to hide')
@@ -60,6 +58,28 @@ def run_encode():
 
     encode_message(args.file, args.message, args.password, args.tool)
 
+# Interactive Version of the encoder (for the menu)
+def run_encode_menu():
+    file = input("Enter file path: ")
+    message = input("Enter message to hide: ")
+    password = input("Enter password (optional): ")
+    tool = input("Choose tool (custom_lsb/steghide/zsteg/opensteg): ")
+
+    if not os.path.exists(file):
+        print(f"[!] File not found: {file}")
+        return
+
+    encode_message(file, message, password, tool)
+
+# Main function to select CLI or Menu-based execution
+def run_encode():
+    import sys
+    if '--file' in sys.argv:
+        # If CLI args are provided, run the CLI version
+        run_encode_cli()
+    else:
+        # Otherwise, run the menu version
+        run_encode_menu()
 
 if __name__ == "__main__":
-    main()
+    run_encode()
