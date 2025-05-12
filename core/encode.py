@@ -1,92 +1,61 @@
+# stegtool/core/encode.py
 import os
-import sys
+import tempfile
+from getpass import getpass
+from importlib import import_module
 from pathlib import Path
-import argparse
 
-# Importing custom encoding tools
-sys.path.append(str(Path(__file__).resolve().parents[1]))  # add root to path
+TOOLS = {
+    'steghide': 'steg_steghide',
+    'exiftool': 'steg_exiftool',
+    'zsteg': 'steg_zsteg'
+}
 
-from core.tools import custom_lsb, steg_steg_hide, steg_zsteg, steg_opensteg
+def run_encode_flow():
+    try:
+        print("\n🛠  Encode Mode")
+        
+        # Select tool
+        print("\nAvailable tools:")
+        for i, tool in enumerate(TOOLS.keys(), 1):
+            print(f"[{i}] {tool}")
+        tool_idx = int(input("\nSelect tool: ")) - 1
+        tool_name = list(TOOLS.keys())[tool_idx]
+        tool_module = import_module(f'core.tools.{TOOLS[tool_name]}')
 
+        # Get inputs
+        cover_path = input("\nEnter cover image path: ").strip()
+        if not Path(cover_path).exists():
+            raise ValueError("Cover image not found")
 
-def get_file_type(filepath):
-    ext = os.path.splitext(filepath)[1].lower()
-    if ext in ['.png', '.jpg', '.jpeg', '.bmp']:
-        return 'image'
-    elif ext in ['.wav', '.mp3']:
-        return 'audio'
-    elif ext in ['.mp4', '.avi', '.mov', '.mkv']:
-        return 'video'
-    else:
-        return 'unknown'
-
-
-def encode_message(filepath, message, password, tool=None):
-    file_type = get_file_type(filepath)
-
-    if tool is None:
-        if file_type == 'image':
-            tool = 'custom_lsb'
+        msg_type = input("\nInput message as (1) text or (2) file: ").strip()
+        if msg_type == '1':
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False) as f:
+                f.write(input("\nEnter secret message: "))
+                msg_path = f.name
+        elif msg_type == '2':
+            msg_path = input("\nEnter message file path: ").strip()
+            if not Path(msg_path).exists():
+                raise ValueError("Message file not found")
         else:
-            print("[!] Please specify a tool for non-image files.")
-            return
+            raise ValueError("Invalid message type")
 
-    print(f"[+] Using tool: {tool}")
+        password = getpass("\nPassword (optional, press Enter to skip): ")
+        output_path = input("\nOutput stego image path: ").strip()
 
-    if tool == 'custom_lsb':
-        custom_lsb.encode(filepath, message)
-    elif tool == 'steghide':
-        steg_steg_hide.encode(filepath, message, password)
-    elif tool == 'zsteg':
-        steg_zsteg.encode(filepath, message)
-    elif tool == 'opensteg':
-        steg_opensteg.encode(filepath, message, password)
-    else:
-        print(f"[!] Tool '{tool}' not supported yet.")
+        # Execute encoding
+        print("\n🔒 Encoding message...")
+        tool_module.encode(
+            cover_image_path=cover_path,
+            message_file=msg_path,
+            password=password,
+            output_path=output_path
+        )
 
+        print(f"\n✅ Success! Stego image saved to: {output_path}")
 
-# CLI Version of the encoder
-def run_encode_cli():
-    parser = argparse.ArgumentParser(description="Encode a message into a media file.")
-    parser.add_argument('--file', required=True, help='Path to input image/audio/video file')
-    parser.add_argument('--message', required=True, help='Message to hide')
-    parser.add_argument('--password', help='Password (optional, used for tools like steghide)')
-    parser.add_argument('--tool', choices=['custom_lsb', 'steghide', 'zsteg', 'opensteg'], default='custom_lsb',
-                        help='Tool to use (default: custom_lsb for images)')
-
-    args = parser.parse_args()
-
-    if not os.path.exists(args.file):
-        print(f"[!] File not found: {args.file}")
-        sys.exit(1)
-
-    encode_message(args.file, args.message, args.password, args.tool)
-
-
-# Interactive Version of the encoder (for the menu)
-def run_encode_menu():
-    file = input("Enter file path: ")
-    message = input("Enter message to hide: ")
-    password = input("Enter password (optional): ")
-    tool = input("Choose tool (custom_lsb/steghide/zsteg/opensteg): ")
-
-    if not os.path.exists(file):
-        print(f"[!] File not found: {file}")
-        return
-
-    encode_message(file, message, password, tool)
-
-
-# Main function to select CLI or Menu-based execution
-def run_encode():
-    import sys
-    if '--file' in sys.argv:
-        # If CLI args are provided, run the CLI version
-        run_encode_cli()
-    else:
-        # Otherwise, run the menu version
-        run_encode_menu()
-
-
-if __name__ == "__main__":
-    run_encode()
+    except Exception as e:
+        print(f"\n❌ Error: {str(e)}")
+    finally:
+        if msg_type == '1' and 'msg_path' in locals():
+            os.remove(msg_path)
