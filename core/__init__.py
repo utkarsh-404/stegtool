@@ -3,5 +3,4 @@
 
 from .encode import *
 from .decode import *
-from .brute_force import *
 from .detect import *
