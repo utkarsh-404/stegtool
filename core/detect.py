@@ -22,7 +22,7 @@ def run_detect_flow():
                 tool_module = import_module(f'core.tools.{module_name}')
                 if hasattr(tool_module, 'detect'):
                     print(f"=== Results from {tool_name.upper()} ===")
-                    print(tool_module.detect(image_path) + "\n"
+                    print(tool_module.detect(image_path) + "\n")
             except Exception as e:
                 print(f"{tool_name} detection failed: {str(e)}\n")
 
