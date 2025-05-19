@@ -33,7 +33,7 @@ A comprehensive command-line interface for image steganography operations. Hide 
 
 ### Quick Install
 ```bash
-curl -O https://raw.githubusercontent.com/yourusername/stegtool/main/install.sh
+curl -O https://raw.githubusercontent.com/utkarsh-404/stegtool/main/install.sh
 chmod +x install.sh
 sudo ./install.sh
 ```
