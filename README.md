@@ -125,7 +125,7 @@ python main.py decode -t zsteg -i suspicious.png -o extracted_data
 4. Follow PEP8 guidelines
 
 ```bash
-git clone https://github.com/yourusername/stegtool
+git clone https://github.com/utkarsh-404/stegtool
 cd stegtool
 # Setup dev environment
 python -m venv venv
