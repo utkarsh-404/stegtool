@@ -2,7 +2,7 @@
 
 A comprehensive command-line interface for image steganography operations. Hide and extract secret messages using various steganographic techniques with modular tool support.
 
-![CLI Demo](https://via.placeholder.com/800x400.png?text=CLI+Demo+Screenshot) *Example CLI interface*
+![CLI Demo](core/cli.png) *Example CLI interface*
 
 ## ✨ Features
 
